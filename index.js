@@ -11,12 +11,11 @@ mongoose.connect(process.env.MONGO_URI, {
   useUnifiedTopology: true,
 });
 
-const urlSchema = mongoose.Schema({
-  original_url: { type: String, required: true },
-  short_url: Number,
+const exerciseTrackSchema = mongoose.Schema({
+ 
 });
 
-let Url = mongoose.model("url", urlSchema);
+let exerciseTracker = mongoose.model("exercise", exerciseTrackSchema);
 
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -30,6 +29,15 @@ app.get('/', (req, res) => {
   res.sendFile(__dirname + '/views/index.html')
 });
 
+
+
+app.get('/api/users', (req, res) => {
+  //res.sendFile(__dirname + '/views/index.html')
+  let body = req.body;
+  if('username' in body){
+    // do the save
+  }
+});
 
 
 

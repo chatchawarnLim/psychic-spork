@@ -36,15 +36,29 @@ app.get("/", (req, res) => {
   res.sendFile(__dirname + "/views/index.html");
 });
 
-app.get("/api/users/:_id/logs", (req, res) => {
+app.post("/api/users", (req, res) => {
+  //res.sendFile(__dirname + '/views/index.html')
+  let body = req.body;
+  if ("username" in body) {
+    // do the save
+    let newUser = new exerciseTracker({ username: body.username });
+    newUser.save(function (err, data) {
+      console.log(err)
+      if (err) return res.sent(err.message);
+      res.json({"_id":data._id, "username": data.username});
+    });
+  }
+}); 
+
+app.get("/api/users/:id/logs", (req, res) => {
   let queryParam = req.params
 
-  if(!'_id' in queryParam) res.status(404).send("Do ")
+  if(!'id' in queryParam) res.status(404).send("Do ")
 
-  exerciseTracker.find({"_id":queryParam._id }, (err,exerciseTrackerData) => {
+  exerciseTracker.findById(queryParam.id , (err,exerciseTrackerData) => {
     if(err) res.sent(err)
+    console.log(exerciseTrackerData)
     exerciseTrackerData.count =exerciseTrackerData.logs.length
-    console.log("get logs",exerciseTrackerData)
     res.json(exerciseTrackerData)
     
   })
@@ -60,8 +74,10 @@ app.post("/api/users/:_id/exercises", (req, res) => {
   if(!'date' in req.body){
     body.date = new Date()
   }
-  exerciseTracker.find({"_id":queryParam._id }, (err,exerciseTrackerData) => {
+  
+  exerciseTracker.findById(queryParam._id , (err,exerciseTrackerData) => {
     if(err) res.sent(err)
+    console.log("post ext",exerciseTrackerData)
     exerciseTrackerData.logs.push(body)
     body['_id'] = queryParam._id;
     body['username'] = exerciseTrackerData.username
@@ -82,18 +98,7 @@ app.get("/api/users", (req, res) => {
   })
 })
 
-app.post("/api/users", (req, res) => {
-  //res.sendFile(__dirname + '/views/index.html')
-  let body = req.body;
-  if ("username" in body) {
-    // do the save
-    let newUser = new exerciseTracker({ username: body.username });
-    newUser.save(function (err, data) {
-      if (err) return res.sent(err.message);
-      res.json({"_id":data._id, "username": data.username});
-    });
-  }
-});
+
 
 const listener = app.listen(process.env.PORT || 3000, () => {
   console.log("Your app is listening on port " + listener.address().port);

@@ -35,8 +35,25 @@ app.use(express.static("public"));
 app.get("/", (req, res) => {
   res.sendFile(__dirname + "/views/index.html");
 });
+
+
+
+app.post("/api/users/:_id/exercises", (req, res) => {
+  let queryParam = req.params
+  let body = req.body
+  console.log(req.body)
+  res.json(body)
+  if('date' in req.body){
+  
+  }
+
+});
+
+
 app.get("/api/users", (req, res) => {
-  exerciseTracker.find({}).
+  exerciseTracker.find({}).then(function(data){
+    res.json(data)
+  })
 })
 
 app.post("/api/users", (req, res) => {
@@ -47,7 +64,6 @@ app.post("/api/users", (req, res) => {
     let newUser = new exerciseTracker({ username: body.username });
     newUser.save(function (err, data) {
       if (err) return res.sent(err.message);
-      console.log(data)
       res.json({"_id":data._id, "username": data.username});
     });
   }

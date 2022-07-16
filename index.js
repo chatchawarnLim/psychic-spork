@@ -43,9 +43,21 @@ app.post("/api/users/:_id/exercises", (req, res) => {
   let body = req.body
   console.log(req.body)
   res.json(body)
-  if('date' in req.body){
-  
+  if(!'_id' in queryParam) res.status(404).send("Do ")
+  if(!'date' in req.body){
+    body.date = new Date()
   }
+  exerciseTracker.find({"_id":queryParam._id }, (err,exerciseTrackerData) => {
+    if(err) res.sent(err)
+    exerciseTrackerData.push(body)
+    body['_id'] = queryParam._id;
+    body['username'] = exerciseTrackerData.username
+    exerciseTrackerData.save((err, updateExercise)=>{
+      if(err) return console.log(err)
+      res.json(body)
+    })
+    
+  })
 
 });
 

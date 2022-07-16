@@ -36,25 +36,39 @@ app.get("/", (req, res) => {
   res.sendFile(__dirname + "/views/index.html");
 });
 
+app.get("/api/users/:_id/logs", (req, res) => {
+  let queryParam = req.params
+
+  if(!'_id' in queryParam) res.status(404).send("Do ")
+
+  exerciseTracker.find({"_id":queryParam._id }, (err,exerciseTrackerData) => {
+    if(err) res.sent(err)
+    exerciseTrackerData.count =exerciseTrackerData.logs.length
+    console.log("get logs",exerciseTrackerData)
+    res.json(exerciseTrackerData)
+    
+  })
+
+});
 
 
 app.post("/api/users/:_id/exercises", (req, res) => {
   let queryParam = req.params
   let body = req.body
-  console.log(req.body)
-  res.json(body)
+
   if(!'_id' in queryParam) res.status(404).send("Do ")
   if(!'date' in req.body){
     body.date = new Date()
   }
   exerciseTracker.find({"_id":queryParam._id }, (err,exerciseTrackerData) => {
     if(err) res.sent(err)
-    exerciseTrackerData.push(body)
+    exerciseTrackerData.logs.push(body)
     body['_id'] = queryParam._id;
     body['username'] = exerciseTrackerData.username
     exerciseTrackerData.save((err, updateExercise)=>{
       if(err) return console.log(err)
-      res.json(body)
+      console.log("post ext",updateExercise)
+      res.json(updateExercise)
     })
     
   })

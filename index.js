@@ -18,12 +18,12 @@ const exerciseTrackSchema = mongoose.Schema({
       description: String,
       duration: Number,
       date: Date,
-    },
+    }
   ],
 });
 
 let exerciseTracker = mongoose.model("exercise", exerciseTrackSchema);
-
+ 
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }));
 
@@ -33,7 +33,7 @@ app.use(bodyParser.json());
 app.use(cors());
 app.use(express.static("public"));
 app.get("/", (req, res) => {
-  res.sendFile(__dirname + "/views/index.html");
+    res.sendFile(__dirname + "/views/index.html");
 });
 
 
@@ -46,34 +46,79 @@ app.post("/api/users", (req, res) => {
     // do the save
     let newUser = new exerciseTracker({ username: body.username });
     newUser.save(function (err, data) {
-      console.log(data)
-      console.log(err);
+
       if (err) return res.sent(err.message);
       res.json({ _id: data._id, username: data.username });
     });
   }
 });
 
-app.get("/api/users/:id/logs", (req, res) => {
-  let queryParam = req.params;
 
-  if (!"id" in queryParam) res.status(404).send("Do ");
+// create
+app.post("/api/users/:id/exercises", (req, res) => {
+    //res.sendFile(__dirname + '/views/index.html')
+    let queryParams = req.params;
+    let body = req.body;
 
-  exerciseTracker.findById(queryParam.id, (err, exerciseTrackerData) => {
-    if (err) res.sent(err);
-    console.log(exerciseTrackerData);
-    exerciseTrackerData.count = exerciseTrackerData.logs.length;
-    res.json(exerciseTrackerData);
+    exerciseTracker.findById(queryParams.id, (err, exercise) =>{
+          if(err) return console.log(err); 
+          if(!body.description  || !body.duration) return res.send("No params")
+          body.date = (body.date)? body.date: new Date()
+          exercise.logs.push(body)
+
+          exercise.save((err, updatedExcersice) => {
+            if(err) return console.log(err);
+            let responseData = updatedExcersice;
+            console.log(updatedExcersice)
+            body['id'] = queryParams.id
+            body['username'] = updatedExcersice.username
+            res.json(body)
+          })
+    
+      } )
+
   });
+  
+// get logs
+app.get("/api/users/:id/logs", (req, res) => {
+  let paramUrl = req.params;
+  let queryParam = req.query;
+
+
+  if (!"id" in paramUrl) res.status(404).send("Do ");
+
+  if(!queryParam){
+
+      exerciseTracker.findById(paramUrl.id, (err, exerciseTrackerData) => {
+        if (err) res.sent(err);
+
+        exerciseTrackerData.count = exerciseTrackerData.logs.length;
+        res.json(exerciseTrackerData);
+      });
+
+  }else{
+        exerciseTracker.find({
+            created_at: {
+                $gte:queryParam.form,
+                $lt:queryParam.to
+            }
+        }).limit(queryParam.limit).select().exec((err, result) => {
+            if(err) return console.log(err);
+             res.json(result)
+          });
+    }
 });
 
 
 app.get("/api/users", (req, res) => {
   exerciseTracker.find({}).then(function (data) {
-    console.log(data)
+
     res.json(data);
   });
 });
+
+
+
 
 const listener = app.listen(process.env.PORT || 3000, () => {
   console.log("Your app is listening on port " + listener.address().port);

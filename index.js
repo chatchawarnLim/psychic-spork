@@ -40,7 +40,6 @@ app.get("/", (req, res) => {
 
 // create
 app.post("/api/users", (req, res) => {
-  //res.sendFile(__dirname + '/views/index.html')
   let body = req.body;
   if ("username" in body) {
     // do the save
@@ -55,9 +54,7 @@ app.post("/api/users", (req, res) => {
 
 
 // create
-// ! still buggy
 app.post("/api/users/:id/exercises", (req, res) => {
-    //res.sendFile(__dirname + '/views/index.html')
     let queryParams = req.params;
     let body = req.body;
 
@@ -77,7 +74,6 @@ app.post("/api/users/:id/exercises", (req, res) => {
               duration: body.duration,
               date: new Date(body.date).toDateString()
             };
-            console.log('This is I return', returnObj)
             res.json(returnObj);
           })
     
@@ -93,26 +89,14 @@ app.get("/api/users/:id/logs", (req, res) => {
 
   if (!"id" in paramUrl) res.status(404).send("Do ");
 
-  // if(!queryParam){
 
       exerciseTracker.find({}, (err, exerciseTrackerData) => {
         if (err) res.sent(err);
 
-        //exerciseTrackerData.count = exerciseTrackerData.logs.length;
         res.json(exerciseTrackerData);
       });
 
-  // }else{
-  //       exerciseTracker.find({
-  //           created_at: {
-  //               $gte:queryParam.form,
-  //               $lt:queryParam.to
-  //           }
-  //       }).limit(queryParam.limit).select().exec((err, result) => {
-  //           if(err) return console.log(err);
-  //            res.json(result)
-  //         });
-  //   }
+
 });
 
 

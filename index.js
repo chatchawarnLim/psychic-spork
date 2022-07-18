@@ -17,7 +17,7 @@ const exerciseTrackSchema = mongoose.Schema({
     {
       description: String,
       duration: Number,
-      date: Date,
+      date: Number,
     }
   ],
 });
@@ -64,7 +64,7 @@ app.post("/api/users/:id/exercises", (req, res) => {
     exerciseTracker.findById(queryParams.id, (err, exercise) =>{
           if(err) return console.log(err); 
           if(!body.description  || !body.duration) return res.send("No params")
-          body.date = (body.date)? body.date: new Date()
+          body.date = (body.date)? new Date(body.date).getTime(): new Date().getTime()
           exercise.logs.push(body)
 
           exercise.save((err, updatedExcersice) => {
